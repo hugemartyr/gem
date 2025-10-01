@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
@@ -17,10 +18,15 @@ export default function Header() {
           height={40}
         />
         <div>
-          <h1 className="text-sm font-bold leading-tight text-black">
-            IMPERIAL GEMOLOGICAL <br />
-            INSTITUTE OF INDIA
-          </h1>
+          <Link
+            href="/admin"
+            className="text-sm font-bold leading-tight text-black hover:text-blue-600 transition"
+          >
+            <h1 className="text-sm font-bold leading-tight text-black">
+              IMPERIAL GEMOLOGICAL <br />
+              INSTITUTE OF INDIA
+            </h1>
+          </Link>
         </div>
       </div>
 

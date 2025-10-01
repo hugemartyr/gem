@@ -5,8 +5,10 @@ import { collection, addDoc } from "firebase/firestore";
 import { db } from "@/lib/firestore";
 import ReportCard from "@/components/ReportCard";
 import Header from "@/components/Header";
+import { useRouter } from "next/navigation";
 
 export default function AddReportPage() {
+  const router = useRouter();
   const [form, setForm] = useState({
     jobNumber: "",
     summaryNumber: "",
@@ -123,7 +125,10 @@ export default function AddReportPage() {
         {/* Popup Report Card */}
         {newReport && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <ReportCard report={newReport} onClose={() => setNewReport(null)} />
+            <ReportCard
+              report={newReport}
+              onClose={() => router.push("/admin")}
+            />
           </div>
         )}
       </div>
