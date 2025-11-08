@@ -51,7 +51,7 @@ export default function AddReportPage() {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gray-100 flex justify-center items-start py-10">
+      <div className="min-h-screen admin-bg bg-gray-100 flex justify-center items-start py-10">
         <div className="bg-white shadow-lg rounded-xl p-8 w-full max-w-5xl">
           {/* Title */}
           <h1 className="text-2xl font-semibold mb-8 text-gray-800">
@@ -115,6 +115,7 @@ export default function AddReportPage() {
               <button
                 type="button"
                 className="w-40 py-2 border border-red-600 text-red-600 rounded-lg shadow hover:bg-red-50"
+                onClick={() => router.push("/admin")}
               >
                 Trash Report
               </button>

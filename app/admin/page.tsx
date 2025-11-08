@@ -25,7 +25,7 @@ export default function AdminDashboard() {
   const [reports, setReports] = useState<Report[]>([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 5;
+  const pageSize = 10;
   const router = useRouter();
 
   useEffect(() => {
@@ -127,7 +127,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen admin-bg">
       {/* Header */}
       <Header />
 
@@ -143,6 +143,14 @@ export default function AdminDashboard() {
           >
             <span>+</span>
             <span>Add New Report</span>
+          </button>
+
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors duration-200 flex items-center space-x-2"
+            onClick={() => router.push("/verifyReport")}
+          >
+            <span>+</span>
+            <span>Verify Report</span>
           </button>
         </div>
 

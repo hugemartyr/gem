@@ -24,3 +24,19 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.admin-bg {
+  background-color: #f3f3f3; /* light gray base */
+  background-image: url("/logocolor.png");
+  background-repeat: no-repeat;
+  background-size: 650px; /* adjust size if needed */
+  background-position: left -60px bottom -40px; /* shift lower-left */
+  background-attachment: fixed;
+}
+
+.card-bg {
+  background-image: url("/logoblaack.png");
+  background-size: 750px;
+  background-repeat: no-repeat;
+  background-position: right -50px bottom -40px;
+}
