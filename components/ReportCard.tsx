@@ -192,7 +192,7 @@ export default function ReportCard({
   };
 
   return (
-    <div className="relative w-[900px] bg-white rounded-xl shadow-xl mx-auto p-10 font-serif overflow-hidden card-bg">
+    <div className="relative w-[900px] bg-white text-black rounded-xl shadow-xl mx-auto p-10 font-serif overflow-hidden card-bg">
       {/* close button */}
       <button
         onClick={onClose}
