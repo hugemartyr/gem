@@ -45,14 +45,14 @@ export default function AdminDashboard() {
     (r) =>
       r.jobNumber?.toLowerCase().includes(search.toLowerCase()) ||
       r.summaryNumber?.toLowerCase().includes(search.toLowerCase()) ||
-      r.onBehalfOf?.toLowerCase().includes(search.toLowerCase())
+      r.onBehalfOf?.toLowerCase().includes(search.toLowerCase()),
   );
 
   // Pagination
   const totalPages = Math.ceil(filteredReports.length / pageSize);
   const paginatedReports = filteredReports.slice(
     (currentPage - 1) * pageSize,
-    currentPage * pageSize
+    currentPage * pageSize,
   );
 
   // 🔹 Export CSV
@@ -109,7 +109,7 @@ export default function AdminDashboard() {
           r.clarity
         } | ${r.colour} | ${r.comments}`,
         14,
-        y
+        y,
       );
       y += 10;
       if (y > 270) {
@@ -126,6 +126,9 @@ export default function AdminDashboard() {
     if (type === "PDF") exportPDF();
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
   return (
     <div className="min-h-screen admin-bg">
       {/* Header */}
@@ -198,7 +201,10 @@ export default function AdminDashboard() {
 
                   <td className="px-4 py-2">{r.status}</td>
                   <td className="px-4 py-2">
-                    <button className="flex items-center text-blue-700 hover:underline">
+                    <button
+                      className="flex items-center text-blue-700 hover:underline"
+                      onClick={handlePrint}
+                    >
                       🖨 Print
                     </button>
                   </td>

@@ -164,6 +164,7 @@ interface Report {
   clarity: string;
   colour: string;
   comments: string;
+  imageUrl?: string; // 1. Added imageUrl to the interface
 }
 
 export default function ReportCard({
@@ -192,84 +193,120 @@ export default function ReportCard({
   };
 
   return (
-    <div className="relative w-[900px] bg-white text-black rounded-xl shadow-xl mx-auto p-10 font-serif overflow-hidden card-bg">
-      {/* close button */}
-      <button
-        onClick={onClose}
-        className="absolute top-3 right-3 text-gray-700 hover:text-black text-xl"
-      >
-        ✕
-      </button>
+    <>
+      <style jsx global>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          .print-card,
+          .print-card * {
+            visibility: visible;
+          }
 
-      {/* top row */}
-      <div className="flex justify-between items-start mb-8">
-        <div className="flex items-center gap-4">
-          <img src="/logocolor.png" className="w-40 h-auto" alt="Logo" />
-          <div>
-            <img src="/writeupblack.png" className="w-80 h-auto" alt="Logo" />
+          .print-card {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 8.5cm !important;
+            height: 5.4cm !important;
+            padding: 0.5cm !important;
+            margin: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            overflow: hidden;
+          }
+
+          @page {
+            size: 8.5cm 5.4cm;
+            margin: 0;
+          }
+
+          .no-print {
+            display: none !important;
+          }
+
+          .print-card p,
+          .print-card div {
+            font-size: 8pt !important;
+            line-height: 1.1 !important;
+          }
+          .print-card img {
+            max-width: 2cm !important;
+          }
+        }
+      `}</style>
+
+      <div className="print-card relative w-[900px] bg-white text-black rounded-xl shadow-xl mx-auto p-10 font-serif overflow-hidden card-bg">
+        <button
+          onClick={onClose}
+          className="no-print absolute top-3 right-3 text-gray-700 hover:text-black text-xl"
+        >
+          ✕
+        </button>
+
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex flex-col gap-1">
+            <img src="/logocolor.png" className="w-24 h-auto" alt="Logo" />
+            <img src="/writeupblack.png" className="w-40 h-auto" alt="Logo" />
           </div>
+          <QRCodeCanvas
+            value={`https://yourdomain.com/verify/${report.summaryNumber}`}
+            size={50}
+          />
         </div>
 
-        {/* QR */}
-        <QRCodeCanvas value="https://example.com" size={100} />
-      </div>
+        <div className="grid grid-cols-[100px_10px_1fr] gap-y-1 text-[10px] leading-tight">
+          <p className="font-bold">SUMMARY NO.</p>
+          <p>:</p>
+          <p>{report.summaryNumber}</p>
+          <p className="font-bold">DESCRIPTION</p>
+          <p>:</p>
+          <p className="text-[9px]">{report.description}</p>
+          <p className="font-bold">SHAPE/CUT</p>
+          <p>:</p>
+          <p>{report.shapeCut}</p>
+          <p className="font-bold">TOTAL WT.</p>
+          <p>:</p>
+          <p>{report.totalEstWt}</p>
+          <p className="font-bold">COLOUR</p>
+          <p>:</p>
+          <p>{report.colour}</p>
+          <p className="font-bold">CLARITY</p>
+          <p>:</p>
+          <p>{report.clarity}</p>
+        </div>
 
-      {/* main field grid */}
-      <div className="grid grid-cols-[200px_20px_1fr] gap-y-2 text-[15px] leading-snug">
-        <p className="font-semibold">SUMMARY NO.</p>
-        <p>:</p>
-        <p>{report.summaryNumber}</p>
-        <p className="font-semibold">DESCRIPTION</p>
-        <p>:</p>
-        <p>{report.description}</p>
-        <p></p>
-        <p></p>
-        <p>containing two hundred thirty natural diamond</p>
-        <p className="font-semibold">SHAPE/CUT</p>
-        <p>:</p>
-        <p>{report.shapeCut}</p>
-        <p className="font-semibold">TOTAL EST. WT.</p>
-        <p>:</p>
-        <p>{report.totalEstWt}</p>
-        <p className="font-semibold">COLOUR</p>
-        <p>:</p>
-        <p>{report.colour}</p>
-        <p className="font-semibold">CLARITY</p>
-        <p>:</p>
-        <p>{report.clarity}</p>
-        <p className="font-semibold">COMMENTS</p>
-        <p>:</p>
-        <p>{report.comments}</p>
-      </div>
+        {/* 2. Updated to show the uploaded image or a placeholder if missing */}
+        <img
+          src={
+            report.imageUrl ||
+            "https://via.placeholder.com/140.png?text=NO+IMAGE"
+          }
+          className="absolute bottom-10 right-4 w-[80px] h-[80px] object-cover rounded shadow-sm"
+          alt="Diamond"
+        />
 
-      {/* product image bottom right */}
-      <img
-        src="https://via.placeholder.com/140.png?text=DIAMOND"
-        className="absolute bottom-14 right-10 w-[140px] rounded-lg"
-      />
+        <div className="mt-4 border-t border-gray-300 pt-1 text-[7px] text-gray-600 leading-none">
+          IGL Terms Apply: www.igi.co.in/terms
+        </div>
 
-      {/* footer notice */}
-      <div className="mt-12 border-t border-gray-300 pt-4 text-xs text-gray-700">
-        IMPORTANT NOTICE: This report is subject to IGl's Terms & Conditions,
-        which can be found at www.igi.co.in/terms. The limitations included in
-        our Terms & Conditions apply to every person reading this
+        <div className="no-print flex justify-end gap-3 mt-6">
+          <button
+            onClick={handlePrint}
+            className="px-4 py-2 bg-gray-200 rounded-lg text-sm"
+          >
+            🖨 Print
+          </button>
+          <button
+            onClick={handleSave}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
+          >
+            💾 Save
+          </button>
+        </div>
       </div>
-
-      {/* buttons */}
-      <div className="flex justify-end gap-3 mt-6">
-        <button
-          onClick={handlePrint}
-          className="px-4 py-2 bg-gray-200 text-gray-900 rounded-lg"
-        >
-          🖨 Print
-        </button>
-        <button
-          onClick={handleSave}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg"
-        >
-          💾 Save
-        </button>
-      </div>
-    </div>
+    </>
   );
 }
