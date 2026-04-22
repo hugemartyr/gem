@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
@@ -6,6 +6,7 @@ import { db } from "@/lib/firestore";
 import jsPDF from "jspdf";
 import Header from "@/components/Header";
 import { useRouter } from "next/navigation";
+import ReportCard from "@/components/ReportCard";
 
 interface Report {
   id: string;
@@ -19,12 +20,14 @@ interface Report {
   colour: string;
   comments: string;
   status: string;
+  imageUrl?: string;
 }
 
 export default function AdminDashboard() {
   const [reports, setReports] = useState<Report[]>([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [activeReport, setActiveReport] = useState<Report | null>(null);
   const pageSize = 10;
   const router = useRouter();
 
@@ -40,7 +43,7 @@ export default function AdminDashboard() {
     fetchReports();
   }, []);
 
-  // Filter
+  // Filter Logic
   const filteredReports = reports.filter(
     (r) =>
       r.jobNumber?.toLowerCase().includes(search.toLowerCase()) ||
@@ -48,14 +51,14 @@ export default function AdminDashboard() {
       r.onBehalfOf?.toLowerCase().includes(search.toLowerCase()),
   );
 
-  // Pagination
+  // Pagination Logic
   const totalPages = Math.ceil(filteredReports.length / pageSize);
   const paginatedReports = filteredReports.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize,
   );
 
-  // 🔹 Export CSV
+  // Export CSV
   const exportCSV = () => {
     const headers = [
       "Job Number",
@@ -83,7 +86,6 @@ export default function AdminDashboard() {
       headers.join(","),
       ...rows.map((row) => row.join(",")),
     ].join("\n");
-
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -94,20 +96,15 @@ export default function AdminDashboard() {
     document.body.removeChild(link);
   };
 
-  // 🔹 Export PDF
+  // Export PDF (List View)
   const exportPDF = () => {
     const doc = new jsPDF();
     doc.setFontSize(12);
     doc.text("Reports Export", 14, 16);
-
     let y = 30;
     filteredReports.forEach((r, index) => {
       doc.text(
-        `${index + 1}. ${r.jobNumber} | ${r.summaryNumber} | ${
-          r.onBehalfOf
-        } | ${r.description} | ${r.shapeCut} | ${r.totalEstWt} | ${
-          r.clarity
-        } | ${r.colour} | ${r.comments}`,
+        `${index + 1}. ${r.jobNumber} | ${r.summaryNumber} | ${r.onBehalfOf}`,
         14,
         y,
       );
@@ -117,8 +114,7 @@ export default function AdminDashboard() {
         y = 20;
       }
     });
-
-    doc.save("reports.pdf");
+    doc.save("reports_list.pdf");
   };
 
   const handleExport = (type: string) => {
@@ -126,86 +122,123 @@ export default function AdminDashboard() {
     if (type === "PDF") exportPDF();
   };
 
-  const handlePrint = () => {
-    window.print();
+  // Specific Report Print Handler
+  const handlePrintCard = (report: Report) => {
+    setActiveReport(report);
+    // Short delay to allow React to render the ReportCard before the print dialog opens
+    setTimeout(() => {
+      window.print();
+      setActiveReport(null);
+    }, 150);
   };
+
   return (
-    <div className="min-h-screen admin-bg">
-      {/* Header */}
+    <div className="min-h-screen admin-bg bg-gray-50">
       <Header />
 
-      <div className="p-6">
-        {/* Title + Button */}
+      {/* Global CSS for Print Handling */}
+      <style jsx global>{`
+        @media print {
+          /* Hide everything on the dashboard during print */
+          .admin-bg,
+          header,
+          .no-print-zone {
+            display: none !important;
+          }
+          /* Ensure the specific card container is shown */
+          .print-only-container {
+            display: block !important;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+          }
+        }
+        @media screen {
+          .print-only-container {
+            display: none; /* Hide the card from standard dashboard view */
+          }
+        }
+      `}</style>
+
+      <div className="p-6 no-print-zone">
+        {/* Top Header Section */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
             Admin Dashboard
           </h1>
-          <button
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors duration-200 flex items-center space-x-2"
-            onClick={() => router.push("/addReport")}
-          >
-            <span>+</span>
-            <span>Add New Report</span>
-          </button>
-
-          <button
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors duration-200 flex items-center space-x-2"
-            onClick={() => router.push("/verifyReport")}
-          >
-            <span>+</span>
-            <span>Verify Report</span>
-          </button>
+          <div className="flex space-x-3">
+            <button
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition flex items-center space-x-2"
+              onClick={() => router.push("/addReport")}
+            >
+              <span>+ Add New Report</span>
+            </button>
+            <button
+              className="px-4 py-2 bg-gray-700 text-white rounded-lg shadow hover:bg-gray-800 transition"
+              onClick={() => router.push("/verifyReport")}
+            >
+              Verify Report
+            </button>
+          </div>
         </div>
 
-        {/* Search + Export */}
+        {/* Search & Export Bar */}
         <div className="flex justify-between items-center mb-4">
           <div className="relative w-1/3">
             <input
               type="text"
-              placeholder="Search..."
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              placeholder="Search reports..."
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-              🔍
-            </span>
           </div>
           <select
-            className="border border-gray-300 px-4 py-2.5 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 cursor-pointer hover:bg-gray-50"
+            className="border border-gray-300 px-4 py-2.5 rounded-lg text-gray-900 cursor-pointer hover:bg-white"
             onChange={(e) => handleExport(e.target.value)}
           >
             <option>Export As</option>
             <option value="CSV">CSV</option>
-            <option value="PDF">PDF</option>
+            <option value="PDF">PDF List</option>
           </select>
         </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-xl shadow overflow-hidden">
-          <table className="w-full text-sm text-left text-gray-900">
-            <thead className="bg-gray-100 text-black">
+        {/* Reports Table */}
+        <div className="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-gray-100 text-gray-700 uppercase text-xs font-bold">
               <tr>
-                <th className="px-4 py-3">Summary Number</th>
-                <th className="px-4 py-3">On Behalf Of</th>
-
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Action</th>
+                <th className="px-6 py-4">Summary Number</th>
+                <th className="px-6 py-4">On Behalf Of</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4 text-center">Action</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-200">
               {paginatedReports.map((r) => (
-                <tr key={r.id} className="border-t text-gray-900">
-                  <td className="px-4 py-2">{r.summaryNumber}</td>
-                  <td className="px-4 py-2">{r.onBehalfOf}</td>
-
-                  <td className="px-4 py-2">{r.status}</td>
-                  <td className="px-4 py-2">
-                    <button
-                      className="flex items-center text-blue-700 hover:underline"
-                      onClick={handlePrint}
+                <tr key={r.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 font-medium text-gray-900">
+                    {r.summaryNumber}
+                  </td>
+                  <td className="px-6 py-4 text-gray-600">{r.onBehalfOf}</td>
+                  <td className="px-6 py-4">
+                    <span
+                      className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
+                        r.status === "published"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-100 text-gray-600"
+                      }`}
                     >
-                      🖨 Print
+                      {r.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <button
+                      className="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold"
+                      onClick={() => handlePrintCard(r)}
+                    >
+                      <span className="mr-1">🖨</span> Print Card
                     </button>
                   </td>
                 </tr>
@@ -214,16 +247,16 @@ export default function AdminDashboard() {
           </table>
         </div>
 
-        {/* Pagination */}
-        <div className="flex justify-center items-center mt-4 space-x-2">
+        {/* Pagination Buttons */}
+        <div className="flex justify-center items-center mt-6 space-x-2">
           {Array.from({ length: totalPages }, (_, i) => (
             <button
               key={i}
               onClick={() => setCurrentPage(i + 1)}
-              className={`px-3 py-1 rounded ${
+              className={`px-4 py-2 rounded-lg transition ${
                 currentPage === i + 1
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200 text-gray-900 hover:bg-gray-300"
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"
               }`}
             >
               {i + 1}
@@ -231,6 +264,16 @@ export default function AdminDashboard() {
           ))}
         </div>
       </div>
+
+      {/* The Hidden Card Container - This is what actually prints */}
+      {activeReport && (
+        <div className="print-only-container">
+          <ReportCard
+            report={activeReport}
+            onClose={() => setActiveReport(null)}
+          />
+        </div>
+      )}
     </div>
   );
 }
