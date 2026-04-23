@@ -60,7 +60,7 @@ export default function ReportCard({
             top: 0;
             width: 8.5cm !important;
             height: 5.4cm !important;
-            padding: 0.4cm !important; /* Slightly reduced padding */
+            padding: 0.3cm 0.35cm !important;
             margin: 0 !important;
             border: none !important;
             box-shadow: none !important;
@@ -80,8 +80,35 @@ export default function ReportCard({
 
           .print-card p,
           .print-card div {
-            font-size: 7.5pt !important; /* Scaled down for PVC fit */
-            line-height: 1.1 !important;
+            font-size: 6.5pt !important;
+            line-height: 1.15 !important;
+          }
+
+          .print-card .card-header-logo {
+            height: 14px !important;
+          }
+
+          .print-card .card-header-writeup {
+            width: 100px !important;
+          }
+
+          .print-card .card-qr canvas {
+            width: 32px !important;
+            height: 32px !important;
+          }
+
+          .print-card .card-diamond-img {
+            width: 55px !important;
+            height: 55px !important;
+            bottom: 18px !important;
+            right: 8px !important;
+          }
+
+          .print-card .card-footer {
+            font-size: 5pt !important;
+            bottom: 4px !important;
+            left: 8px !important;
+            right: 8px !important;
           }
 
           /* Ensure logo header fits side-by-side in print */
@@ -89,52 +116,57 @@ export default function ReportCard({
             display: flex !important;
             flex-direction: row !important;
             align-items: center !important;
+            margin-bottom: 4px !important;
           }
         }
       `}</style>
 
-      <div className="print-card relative w-[900px] bg-white text-black rounded-xl shadow-xl mx-auto p-10 font-serif overflow-hidden card-bg">
+      <div className="print-card relative bg-white text-black rounded-xl shadow-xl mx-auto font-serif overflow-hidden card-bg"
+        style={{ width: "8.5cm", height: "5.4cm", padding: "0.3cm 0.35cm" }}
+      >
         <button
           onClick={onClose}
-          className="no-print absolute top-3 right-3 text-gray-700 hover:text-black text-xl z-10"
+          className="no-print absolute top-1 right-1.5 text-gray-700 hover:text-black text-sm z-10"
         >
           ✕
         </button>
 
         {/* Header Section: Logo and Text side-by-side */}
-        <div className="header-container flex justify-between items-center mb-4">
-          <div className="flex items-center gap-2">
-            <img src="/logocolor.png" className="w-10 h-auto" alt="Logo" />
+        <div className="header-container flex justify-between items-center mb-1.5">
+          <div className="flex items-center gap-1.5">
+            <img src="/logocolor.png" className="card-header-logo h-[18px] w-auto" alt="Logo" />
             <img
               src="/writeupblack.png"
-              className="w-48 h-auto"
+              className="card-header-writeup w-[110px] h-auto"
               alt="Imperial Gemological Institute"
             />
           </div>
-          <QRCodeCanvas
-            value={`https://yourdomain.com/verify/${report.summaryNumber}`}
-            size={45}
-          />
+          <div className="card-qr">
+            <QRCodeCanvas
+              value={`https://yourdomain.com/verify/${report.summaryNumber}`}
+              size={36}
+            />
+          </div>
         </div>
 
         {/* Data Grid */}
-        <div className="grid grid-cols-[90px_10px_1fr] gap-y-1 text-[10px] leading-tight">
-          <p className="font-bold">SUMMARY NO.</p>
+        <div className="grid grid-cols-[68px_8px_1fr] gap-y-[2px] text-[7pt] leading-snug">
+          <p className="font-bold uppercase tracking-tight">Summary No.</p>
           <p>:</p>
           <p>{report.summaryNumber}</p>
-          <p className="font-bold">DESCRIPTION</p>
+          <p className="font-bold uppercase tracking-tight">Description</p>
           <p>:</p>
-          <p className="text-[9px]">{report.description}</p>
-          <p className="font-bold">SHAPE/CUT</p>
+          <p className="text-[6.5pt]">{report.description}</p>
+          <p className="font-bold uppercase tracking-tight">Shape/Cut</p>
           <p>:</p>
           <p>{report.shapeCut}</p>
-          <p className="font-bold">TOTAL WT.</p>
+          <p className="font-bold uppercase tracking-tight">Total Wt.</p>
           <p>:</p>
           <p>{report.totalEstWt}</p>
-          <p className="font-bold">COLOUR</p>
+          <p className="font-bold uppercase tracking-tight">Colour</p>
           <p>:</p>
           <p>{report.colour}</p>
-          <p className="font-bold">CLARITY</p>
+          <p className="font-bold uppercase tracking-tight">Clarity</p>
           <p>:</p>
           <p>{report.clarity}</p>
         </div>
@@ -145,27 +177,27 @@ export default function ReportCard({
             report.imageUrl ||
             "https://via.placeholder.com/140.png?text=NO+IMAGE"
           }
-          className="absolute bottom-8 right-4 w-[75px] h-[75px] object-cover rounded shadow-sm border border-gray-100"
+          className="card-diamond-img absolute bottom-[18px] right-[10px] w-[58px] h-[58px] object-cover rounded shadow-sm border border-gray-200"
           alt="Diamond"
         />
 
         {/* Footer */}
-        <div className="absolute bottom-3 left-4 right-4 border-t border-gray-300 pt-1 text-[6.5px] text-gray-600 leading-none">
-          IMPORTANT NOTICE: This report is subject to IGI's Terms & Conditions.
+        <div className="card-footer absolute bottom-[5px] left-[10px] right-[10px] border-t border-gray-300 pt-[2px] text-[5pt] text-gray-500 leading-none">
+          IMPORTANT NOTICE: This report is subject to IGI&apos;s Terms &amp; Conditions.
           Verify at www.igi.co.in/terms
         </div>
 
         {/* Action Buttons */}
-        <div className="no-print flex justify-end gap-3 mt-6">
+        <div className="no-print flex justify-end gap-2 mt-3">
           <button
             onClick={handlePrint}
-            className="px-4 py-2 bg-gray-200 rounded-lg text-sm hover:bg-gray-300 transition-colors"
+            className="px-3 py-1.5 bg-gray-200 rounded-lg text-xs hover:bg-gray-300 transition-colors"
           >
             🖨 Print
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+            className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-700 transition-colors"
           >
             💾 Save
           </button>

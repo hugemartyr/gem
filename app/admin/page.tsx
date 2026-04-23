@@ -139,19 +139,51 @@ export default function AdminDashboard() {
       {/* Global CSS for Print Handling */}
       <style jsx global>{`
         @media print {
-          /* Hide everything on the dashboard during print */
-          .admin-bg,
-          header,
-          .no-print-zone {
+          /* Hide the dashboard UI during print */
+          .no-print-zone,
+          .no-print,
+          header {
             display: none !important;
           }
-          /* Ensure the specific card container is shown */
+
+          /* Reset the parent wrapper so it doesn't interfere */
+          .admin-bg {
+            background: none !important;
+            background-image: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            min-height: auto !important;
+          }
+
+          /* Show the print card container */
           .print-only-container {
             display: block !important;
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
+            width: 8.5cm;
+            height: 5.4cm;
+            z-index: 9999;
+          }
+
+          .print-only-container .print-card {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 8.5cm !important;
+            height: 5.4cm !important;
+            padding: 0.3cm 0.35cm !important;
+            margin: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            overflow: hidden;
+            background-color: white !important;
+          }
+
+          @page {
+            size: 8.5cm 5.4cm;
+            margin: 0;
           }
         }
         @media screen {
